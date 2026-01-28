@@ -1,34 +1,260 @@
-.App-logo {
-    height: 40vmin;
-    pointer-events: none;
+/* Hero Section */
+.hero-section {
+    position: relative;
+    min-height: 90vh;
+    overflow: hidden;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-    .App-logo {
-        animation: App-logo-spin infinite 20s linear;
-    }
+.hero-image {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 
-.App-header {
-    background-color: #0f0f10;
-    min-height: 100vh;
+.hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.2) 50%, transparent 100%);
+}
+
+.hero-content {
+    position: relative;
+    z-index: 10;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    font-size: calc(10px + 2vmin);
+    min-height: 90vh;
+    padding: 2rem;
+    text-align: center;
+}
+
+/* Search Bar */
+.search-container {
+    backdrop-filter: blur(16px);
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 9999px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+    padding: 0.5rem;
+    max-width: 600px;
+    width: 100%;
+}
+
+/* Destination Card */
+.destination-card {
+    position: relative;
+    overflow: hidden;
+    border-radius: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.destination-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.15);
+}
+
+.destination-card img {
+    transition: transform 0.7s ease;
+}
+
+.destination-card:hover img {
+    transform: scale(1.05);
+}
+
+.destination-card-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.2) 50%, transparent 100%);
+}
+
+/* Hotel Card */
+.hotel-card {
+    background: white;
+    border-radius: 1rem;
+    overflow: hidden;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+    transition: all 0.3s ease;
+    border: 1px solid rgba(0,0,0,0.05);
+}
+
+.hotel-card:hover {
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    border-color: rgba(255, 153, 51, 0.3);
+}
+
+/* Map Container */
+.map-container {
+    border-radius: 1rem;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+    border: 4px solid white;
+}
+
+/* Tabs */
+.tab-trigger {
+    position: relative;
+    padding: 0.75rem 1.5rem;
+    font-weight: 500;
+    color: #4A4A4A;
+    transition: color 0.2s ease;
+}
+
+.tab-trigger[data-state="active"] {
+    color: #FF9933;
+}
+
+.tab-trigger[data-state="active"]::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: #FF9933;
+    border-radius: 3px 3px 0 0;
+}
+
+/* Transport Card */
+.transport-card {
+    background: white;
+    border-radius: 1rem;
+    padding: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    border: 1px solid rgba(0,0,0,0.05);
+    transition: all 0.3s ease;
+}
+
+.transport-card:hover {
+    box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+    border-color: rgba(0, 128, 128, 0.3);
+}
+
+/* Badge */
+.category-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* Loading skeleton */
+.skeleton {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+/* Bento Grid */
+.bento-grid {
+    display: grid;
+    grid-template-columns: repeat(1, 1fr);
+    gap: 1rem;
+}
+
+@media (min-width: 768px) {
+    .bento-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1.5rem;
+    }
+}
+
+@media (min-width: 1024px) {
+    .bento-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+.bento-grid > :first-child {
+    grid-column: span 2;
+    grid-row: span 2;
+}
+
+/* Button styles */
+.btn-primary {
+    background-color: #FF9933;
+    color: white;
+    font-weight: 600;
+    padding: 0.75rem 2rem;
+    border-radius: 9999px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 14px rgba(255, 153, 51, 0.3);
+}
+
+.btn-primary:hover {
+    background-color: #E68A00;
+    transform: scale(1.02);
+    box-shadow: 0 6px 20px rgba(255, 153, 51, 0.4);
+}
+
+.btn-secondary {
+    background: transparent;
+    color: #008080;
+    font-weight: 500;
+    padding: 0.75rem 2rem;
+    border-radius: 9999px;
+    border: 2px solid #008080;
+    transition: all 0.3s ease;
+}
+
+.btn-secondary:hover {
+    background-color: #008080;
     color: white;
 }
 
-.App-link {
-    color: #61dafb;
+/* Price tag */
+.price-tag {
+    background: linear-gradient(135deg, #FF9933 0%, #FFB366 100%);
+    color: white;
+    font-weight: 700;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
 }
 
-@keyframes App-logo-spin {
-    from {
-        transform: rotate(0deg);
-    }
-    to {
-        transform: rotate(360deg);
+/* Section styling */
+.section-container {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+@media (min-width: 640px) {
+    .section-container {
+        padding: 0 1.5rem;
     }
 }
+
+@media (min-width: 1024px) {
+    .section-container {
+        padding: 0 2rem;
+    }
+}
+
+/* Glassmorphism card */
+.glass-card {
+    backdrop-filter: blur(12px);
+    background: rgba(255, 255, 255, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+/* Transport type icons colors */
+.transport-flight { color: #3B82F6; background: #EFF6FF; }
+.transport-train { color: #10B981; background: #ECFDF5; }
+.transport-bus { color: #F59E0B; background: #FFFBEB; }
+.transport-local { color: #8B5CF6; background: #F5F3FF; }
