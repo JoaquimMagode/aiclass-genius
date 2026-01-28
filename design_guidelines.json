@@ -1,0 +1,194 @@
+{
+  "typography": {
+    "font_family": {
+      "headings": "Playfair Display, serif",
+      "body": "Outfit, sans-serif",
+      "accent": "Cinzel, serif",
+      "mono": "JetBrains Mono, monospace"
+    },
+    "weights": {
+      "light": 300,
+      "regular": 400,
+      "medium": 500,
+      "bold": 700,
+      "black": 900
+    },
+    "sizes": {
+      "display": "text-6xl md:text-8xl tracking-tighter leading-none",
+      "h1": "text-5xl md:text-6xl tracking-tight font-bold",
+      "h2": "text-4xl md:text-5xl tracking-tight font-semibold",
+      "h3": "text-3xl md:text-4xl font-medium",
+      "body_lg": "text-lg md:text-xl leading-relaxed",
+      "body_base": "text-base leading-relaxed",
+      "caption": "text-sm tracking-wide uppercase opacity-80"
+    },
+    "installation": "Import fonts via Google Fonts in index.css: @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Outfit:wght@300;400;500;700&family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&display=swap');"
+  },
+  "colors": {
+    "palette": {
+      "primary": {
+        "name": "Marigold Saffron",
+        "hex": "#FF9933",
+        "tailwind": "bg-[#FF9933] text-white hover:bg-[#E68A00]"
+      },
+      "secondary": {
+        "name": "Royal Teal",
+        "hex": "#008080",
+        "tailwind": "bg-[#008080] text-white"
+      },
+      "accent": {
+        "name": "Rani Pink",
+        "hex": "#FF007F",
+        "tailwind": "text-[#FF007F] border-[#FF007F]"
+      },
+      "background": {
+        "light": "#FAF9F6",
+        "dark": "#1A1A2E",
+        "paper": "#FFFFFF"
+      },
+      "text": {
+        "primary": "#1A1A1A",
+        "secondary": "#4A4A4A",
+        "muted": "#888888"
+      }
+    },
+    "gradients": {
+      "hero_overlay": "bg-gradient-to-b from-black/40 via-black/20 to-transparent",
+      "card_hover": "bg-gradient-to-br from-[#FF9933]/10 to-[#FF007F]/10",
+      "text_gradient": "bg-clip-text text-transparent bg-gradient-to-r from-[#FF9933] to-[#FF007F]"
+    },
+    "usage_rules": [
+      "Use Marigold (#FF9933) for primary CTAs (Book Now, Search).",
+      "Use Royal Teal (#008080) for trust elements (Maps, Info Cards).",
+      "Use Rani Pink (#FF007F) sparingly for 'Love' icons, 'Hot' deals, or active states.",
+      "Backgrounds should be Warm Sand (#FAF9F6) to evoke paper/parchment, not sterile white."
+    ]
+  },
+  "visual_enhancers": {
+    "shadows": {
+      "soft": "shadow-[0_8px_30px_rgb(0,0,0,0.04)]",
+      "card": "shadow-[0_4px_14px_0_rgba(0,0,0,0.1)] hover:shadow-[0_6px_20px_rgba(0,0,0,0.15)] transition-shadow duration-300",
+      "glow": "shadow-[0_0_20px_rgba(255,153,51,0.3)]"
+    },
+    "borders": {
+      "subtle": "border border-stone-200",
+      "glass": "border border-white/20"
+    },
+    "radius": {
+      "default": "rounded-xl",
+      "pill": "rounded-full",
+      "card": "rounded-2xl"
+    },
+    "textures": {
+      "grain": "Use a subtle SVG noise overlay on the main background to reduce digital flatness."
+    }
+  },
+  "component_strategies": {
+    "buttons": {
+      "primary": "rounded-full px-8 py-4 bg-[#FF9933] text-white font-bold tracking-wide hover:scale-105 transition-transform shadow-lg",
+      "secondary": "rounded-full px-8 py-4 border-2 border-[#008080] text-[#008080] font-medium hover:bg-[#008080] hover:text-white transition-colors",
+      "ghost": "text-stone-600 hover:text-[#FF9933] font-medium underline-offset-4 hover:underline"
+    },
+    "cards": {
+      "destination": "group relative overflow-hidden rounded-2xl aspect-[3/4] cursor-pointer",
+      "hotel": "bg-white rounded-xl shadow-sm border border-stone-100 hover:border-[#FF9933]/30 transition-colors p-4",
+      "feature": "bg-stone-50 p-8 rounded-2xl border border-stone-100 hover:bg-white hover:shadow-md transition-all"
+    },
+    "inputs": {
+      "search": "h-14 pl-12 pr-4 rounded-full bg-white/90 backdrop-blur-md border border-stone-200 focus:border-[#FF9933] focus:ring-2 focus:ring-[#FF9933]/20 shadow-lg text-lg placeholder:text-stone-400"
+    }
+  },
+  "grids_and_layouts": {
+    "container": "max-w-7xl mx-auto px-4 sm:px-6 lg:px-8",
+    "bento_grid": "grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 auto-rows-[200px]",
+    "section_spacing": "py-20 md:py-32",
+    "modes": {
+      "marketing": "Use 'Tetris' grid: Mix hero spans (col-span-2 row-span-2) with standard tiles.",
+      "dashboard": "Use 'High Density' grid: Tight gap-4, uniform heights."
+    }
+  },
+  "motion": {
+    "transitions": "transition-all duration-300 ease-out",
+    "hover_effects": {
+      "lift": "hover:-translate-y-1",
+      "zoom": "group-hover:scale-105 transition-transform duration-700 ease-in-out"
+    },
+    "animation_classes": {
+      "fade_in": "animate-in fade-in duration-700",
+      "slide_up": "animate-in slide-in-from-bottom-8 duration-700"
+    }
+  },
+  "accessibility": {
+    "contrast": "Ensure text on colored backgrounds meets WCAG AA (4.5:1). Use dark text on Marigold backgrounds if needed.",
+    "focus_states": "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF9933] focus-visible:ring-offset-2",
+    "reduced_motion": "motion-reduce:transition-none motion-reduce:animate-none"
+  },
+  "media": {
+    "images": {
+      "style": "High saturation, warm tones, cinematic composition. Avoid staged stock photos.",
+      "radius": "rounded-2xl",
+      "aspect_ratios": {
+        "hero": "aspect-video md:aspect-[21/9]",
+        "card": "aspect-[4/5]",
+        "gallery": "aspect-square"
+      }
+    },
+    "icons": {
+      "library": "Lucide React",
+      "style": "Stroke width 1.5px, rounded caps. Color: #4A4A4A or Brand Colors."
+    }
+  },
+  "image_urls": {
+    "hero": [
+      {
+        "url": "https://images.unsplash.com/photo-1732308988547-bfbcf9171f69?crop=entropy&cs=srgb&fm=jpg&q=85",
+        "alt": "Taj Mahal at Golden Hour through Archway",
+        "category": "hero_main"
+      },
+      {
+        "url": "https://images.unsplash.com/photo-1742109536522-2882cdb07198?crop=entropy&cs=srgb&fm=jpg&q=85",
+        "alt": "Taj Mahal Reflection in Yamuna",
+        "category": "hero_secondary"
+      }
+    ],
+    "destinations": [
+      {
+        "url": "https://images.unsplash.com/photo-1707893013488-51672ef83425?crop=entropy&cs=srgb&fm=jpg&q=85",
+        "alt": "Kerala Houseboat Backwaters",
+        "category": "nature_calm"
+      },
+      {
+        "url": "https://images.unsplash.com/photo-1618128587777-c472aa97d836?crop=entropy&cs=srgb&fm=jpg&q=85",
+        "alt": "Jaipur Hawa Mahal Vibrant",
+        "category": "culture_vibrant"
+      },
+      {
+        "url": "https://images.unsplash.com/photo-1757308530438-4e2340a6475f?crop=entropy&cs=srgb&fm=jpg&q=85",
+        "alt": "Varanasi Aarti Lamp Spiritual",
+        "category": "spiritual_detail"
+      }
+    ],
+    "placeholders": {
+      "map_preview": "https://images.unsplash.com/photo-1524661135-423995f22d0b?auto=format&fit=crop&q=80",
+      "hotel_room": "https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&q=80"
+    }
+  },
+  "instructions_to_main_agent": [
+    "1. INSTALL FONTS FIRST: Add the Google Fonts import to index.css immediately.",
+    "2. CONFIGURE TAILWIND: Update tailwind.config.js with the 'Marigold', 'Royal Teal', and 'Rani Pink' colors.",
+    "3. BUILD THE HERO: Create a 'HeroSection' component that uses the Taj Mahal image with a glassmorphism search bar overlay.",
+    "4. USE SHADCN SMARTLY: Use Shadcn for complex interactions (DatePickers, Dialogs) but style them with the 'visual_enhancers' rules (rounded-xl, warm borders).",
+    "5. MAP INTEGRATION: Use 'react-leaflet' for the map. Style the map container with a thick white border and shadow-lg to make it look like a physical map.",
+    "6. DATA-TESTID: Ensure every button and input has a data-testid attribute (e.g., 'search-button', 'destination-card-kerala').",
+    "7. NO GENERIC GRIDS: When displaying destinations, use the 'Bento Grid' layout defined in 'grids_and_layouts'."
+  ],
+  "universal_guidelines": [
+    "Avoid 'AI Slop': Do not use generic gradients or centered text everywhere.",
+    "Dark colors look good when used independently without gradients.",
+    "Create depth through layered design elements with z-index hierarchy.",
+    "Use glass-morphism effects with backdrop filters (12-24px blur).",
+    "Every interaction needs micro-animations - hover states, transitions.",
+    "Use 2-3x more spacing than feels comfortable.",
+    "Subtle grain textures overlay recommended."
+  ]
+}
