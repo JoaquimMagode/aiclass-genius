@@ -86,8 +86,8 @@ const HeroSection = ({ onSearch, searchQuery, setSearchQuery, searchResults, isS
           Explore the land of diverse cultures, ancient heritage, and breathtaking landscapes
         </p>
         
-        <div className="relative w-full max-w-xl animate-fade-in-up delay-200">
-          <div className="search-container flex items-center">
+        <div className="relative w-full max-w-xl animate-fade-in-up delay-200 z-40">
+          <div className="search-container flex items-center relative z-40">
             <Search className="w-5 h-5 text-stone-400 ml-4" />
             <Input
               type="text"
@@ -113,15 +113,17 @@ const HeroSection = ({ onSearch, searchQuery, setSearchQuery, searchResults, isS
           
           {/* Search Results Dropdown */}
           {searchResults.length > 0 && searchQuery.length >= 2 && (
-            <div className="absolute top-full mt-2 w-full bg-white rounded-2xl shadow-lg border border-stone-100 overflow-hidden z-20" data-testid="search-results">
+            <div className="absolute top-full mt-2 w-full bg-white rounded-2xl shadow-lg border border-stone-100 overflow-hidden z-50" data-testid="search-results">
               {searchResults.map((dest) => (
                 <button
                   key={dest.id}
-                  onClick={() => {
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
                     navigate(`/destination/${dest.id}`);
                     setSearchQuery('');
                   }}
-                  className="w-full flex items-center gap-4 p-4 hover:bg-stone-50 transition-colors text-left"
+                  className="w-full flex items-center gap-4 p-4 hover:bg-stone-50 transition-colors text-left relative z-50"
                   data-testid={`search-result-${dest.id}`}
                 >
                   <img 
