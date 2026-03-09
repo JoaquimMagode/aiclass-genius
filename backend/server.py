@@ -10,6 +10,7 @@ from typing import List, Optional, Dict, Any
 import uuid
 from datetime import datetime, timezone
 from emergentintegrations.llm.chat import LlmChat, UserMessage
+import random
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
@@ -23,7 +24,7 @@ db = client[os.environ['DB_NAME']]
 EMERGENT_LLM_KEY = os.environ.get('EMERGENT_LLM_KEY', '')
 
 # Create the main app
-app = FastAPI()
+app = FastAPI(title="PackVote API", description="Group Travel Planning with AI & Voting")
 
 # Create a router with the /api prefix
 api_router = APIRouter(prefix="/api")
@@ -42,6 +43,7 @@ class Destination(BaseModel):
     longitude: float
     best_time_to_visit: str
     popular_for: List[str]
+    budget_per_day: int = 3000  # Average daily budget
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 class Hotel(BaseModel):
@@ -65,7 +67,7 @@ class Attraction(BaseModel):
     name: str
     description: str
     image_url: str
-    category: str  # temple, monument, nature, etc.
+    category: str
     entry_fee: int
     timings: str
     latitude: float
@@ -87,7 +89,7 @@ class Transport(BaseModel):
     model_config = ConfigDict(extra="ignore")
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     destination_id: str
-    type: str  # train, bus, flight, local
+    type: str
     name: str
     description: str
     from_location: str
@@ -96,12 +98,61 @@ class Transport(BaseModel):
     price_range: str
     frequency: str
 
-class SearchQuery(BaseModel):
-    query: str
+# ============== NEW MODELS FOR PACKVOTE ==============
+
+class TripCreate(BaseModel):
+    name: str
+    description: Optional[str] = ""
+    creator_name: str
+    group_type: str = "friends"  # friends, family, corporate
+    start_date: Optional[str] = None
+    end_date: Optional[str] = None
+    budget_per_person: Optional[int] = None
+
+class Trip(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    name: str
+    description: str
+    creator_name: str
+    group_type: str
+    start_date: Optional[str]
+    end_date: Optional[str]
+    budget_per_person: Optional[int]
+    invite_code: str = Field(default_factory=lambda: ''.join(random.choices('ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789', k=6)))
+    members: List[Dict] = []
+    destination_votes: List[Dict] = []
+    hotel_votes: List[Dict] = []
+    status: str = "planning"  # planning, voting, finalized
+    selected_destination: Optional[str] = None
+    selected_hotel: Optional[str] = None
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class JoinTrip(BaseModel):
+    invite_code: str
+    member_name: str
+
+class VoteRequest(BaseModel):
+    trip_id: str
+    voter_name: str
+    item_type: str  # destination or hotel
+    item_id: str
+
+class CompareRequest(BaseModel):
+    item_type: str  # destinations or hotels
+    item_ids: List[str]
+    destination_id: Optional[str] = None  # Required for hotels
+
+class AISuggestionRequest(BaseModel):
+    group_type: str
+    budget_per_person: Optional[int] = None
+    duration_days: Optional[int] = None
+    interests: List[str] = []
+    group_size: Optional[int] = None
 
 class AIDescriptionRequest(BaseModel):
     destination_name: str
-    topic: str  # overview, culture, food, tips
+    topic: str
 
 # ============== SEED DATA ==============
 
@@ -116,7 +167,8 @@ DESTINATIONS_DATA = [
         "latitude": 28.6139,
         "longitude": 77.2090,
         "best_time_to_visit": "October to March",
-        "popular_for": ["History", "Street Food", "Shopping", "Monuments"]
+        "popular_for": ["History", "Street Food", "Shopping", "Monuments"],
+        "budget_per_day": 3500
     },
     {
         "id": "jaipur",
@@ -128,7 +180,8 @@ DESTINATIONS_DATA = [
         "latitude": 26.9124,
         "longitude": 75.7873,
         "best_time_to_visit": "November to February",
-        "popular_for": ["Palaces", "Forts", "Handicrafts", "Culture"]
+        "popular_for": ["Palaces", "Forts", "Handicrafts", "Culture"],
+        "budget_per_day": 3000
     },
     {
         "id": "goa",
@@ -140,7 +193,8 @@ DESTINATIONS_DATA = [
         "latitude": 15.2993,
         "longitude": 74.1240,
         "best_time_to_visit": "November to February",
-        "popular_for": ["Beaches", "Nightlife", "Water Sports", "Churches"]
+        "popular_for": ["Beaches", "Nightlife", "Water Sports", "Churches"],
+        "budget_per_day": 4000
     },
     {
         "id": "kerala",
@@ -152,7 +206,8 @@ DESTINATIONS_DATA = [
         "latitude": 10.8505,
         "longitude": 76.2711,
         "best_time_to_visit": "September to March",
-        "popular_for": ["Backwaters", "Ayurveda", "Tea Gardens", "Wildlife"]
+        "popular_for": ["Backwaters", "Ayurveda", "Tea Gardens", "Wildlife"],
+        "budget_per_day": 4500
     },
     {
         "id": "agra",
@@ -164,7 +219,8 @@ DESTINATIONS_DATA = [
         "latitude": 27.1767,
         "longitude": 78.0081,
         "best_time_to_visit": "October to March",
-        "popular_for": ["Taj Mahal", "Agra Fort", "Mughal Architecture", "Handicrafts"]
+        "popular_for": ["Taj Mahal", "Agra Fort", "Mughal Architecture", "Handicrafts"],
+        "budget_per_day": 2500
     },
     {
         "id": "varanasi",
@@ -176,7 +232,8 @@ DESTINATIONS_DATA = [
         "latitude": 25.3176,
         "longitude": 82.9739,
         "best_time_to_visit": "October to March",
-        "popular_for": ["Ghats", "Temples", "Spirituality", "Silk Weaving"]
+        "popular_for": ["Ghats", "Temples", "Spirituality", "Silk Weaving"],
+        "budget_per_day": 2000
     },
     {
         "id": "mumbai",
@@ -188,7 +245,8 @@ DESTINATIONS_DATA = [
         "latitude": 19.0760,
         "longitude": 72.8777,
         "best_time_to_visit": "November to February",
-        "popular_for": ["Gateway of India", "Bollywood", "Street Food", "Marine Drive"]
+        "popular_for": ["Gateway of India", "Bollywood", "Street Food", "Marine Drive"],
+        "budget_per_day": 5000
     },
     {
         "id": "udaipur",
@@ -200,7 +258,8 @@ DESTINATIONS_DATA = [
         "latitude": 24.5854,
         "longitude": 73.7125,
         "best_time_to_visit": "September to March",
-        "popular_for": ["Lake Palace", "City Palace", "Boating", "Heritage Hotels"]
+        "popular_for": ["Lake Palace", "City Palace", "Boating", "Heritage Hotels"],
+        "budget_per_day": 3500
     }
 ]
 
@@ -396,71 +455,50 @@ TRANSPORT_DATA = {
 
 async def seed_database():
     """Seed the database with initial data if empty"""
-    # Check if destinations already exist
     existing = await db.destinations.count_documents({})
     if existing > 0:
         return
     
-    # Seed destinations
     for dest in DESTINATIONS_DATA:
         dest_doc = {**dest, "created_at": datetime.now(timezone.utc).isoformat()}
         await db.destinations.insert_one(dest_doc)
     
-    # Seed hotels, attractions, shopping, transport for each destination
     for dest_id, hotels in HOTELS_DATA.items():
         for hotel in hotels:
-            hotel_doc = {
-                "id": str(uuid.uuid4()),
-                "destination_id": dest_id,
-                **hotel
-            }
+            hotel_doc = {"id": str(uuid.uuid4()), "destination_id": dest_id, **hotel}
             await db.hotels.insert_one(hotel_doc)
     
     for dest_id, attractions in ATTRACTIONS_DATA.items():
         for attraction in attractions:
-            attr_doc = {
-                "id": str(uuid.uuid4()),
-                "destination_id": dest_id,
-                **attraction
-            }
+            attr_doc = {"id": str(uuid.uuid4()), "destination_id": dest_id, **attraction}
             await db.attractions.insert_one(attr_doc)
     
     for dest_id, shops in SHOPPING_DATA.items():
         for shop in shops:
-            shop_doc = {
-                "id": str(uuid.uuid4()),
-                "destination_id": dest_id,
-                **shop
-            }
+            shop_doc = {"id": str(uuid.uuid4()), "destination_id": dest_id, **shop}
             await db.shopping.insert_one(shop_doc)
     
     for dest_id, transports in TRANSPORT_DATA.items():
         for transport in transports:
-            trans_doc = {
-                "id": str(uuid.uuid4()),
-                "destination_id": dest_id,
-                **transport
-            }
+            trans_doc = {"id": str(uuid.uuid4()), "destination_id": dest_id, **transport}
             await db.transport.insert_one(trans_doc)
     
     logger.info("Database seeded successfully!")
 
-# ============== API ENDPOINTS ==============
+# ============== ORIGINAL API ENDPOINTS ==============
 
 @api_router.get("/")
 async def root():
-    return {"message": "DiscoVerYatra API - Explore India!"}
+    return {"message": "PackVote API - Group Travel Planning with AI & Voting!"}
 
 @api_router.get("/destinations", response_model=List[Dict])
 async def get_destinations():
-    """Get all destinations"""
     await seed_database()
     destinations = await db.destinations.find({}, {"_id": 0}).to_list(100)
     return destinations
 
 @api_router.get("/destinations/search")
 async def search_destinations(q: str = Query(..., min_length=1)):
-    """Search destinations by name or state"""
     await seed_database()
     query = {
         "$or": [
@@ -474,7 +512,6 @@ async def search_destinations(q: str = Query(..., min_length=1)):
 
 @api_router.get("/destinations/{destination_id}")
 async def get_destination(destination_id: str):
-    """Get destination details"""
     await seed_database()
     destination = await db.destinations.find_one({"id": destination_id}, {"_id": 0})
     if not destination:
@@ -483,31 +520,239 @@ async def get_destination(destination_id: str):
 
 @api_router.get("/destinations/{destination_id}/hotels")
 async def get_destination_hotels(destination_id: str):
-    """Get hotels for a destination"""
     await seed_database()
     hotels = await db.hotels.find({"destination_id": destination_id}, {"_id": 0}).to_list(50)
     return hotels
 
 @api_router.get("/destinations/{destination_id}/attractions")
 async def get_destination_attractions(destination_id: str):
-    """Get attractions for a destination"""
     await seed_database()
     attractions = await db.attractions.find({"destination_id": destination_id}, {"_id": 0}).to_list(50)
     return attractions
 
 @api_router.get("/destinations/{destination_id}/shopping")
 async def get_destination_shopping(destination_id: str):
-    """Get shopping places for a destination"""
     await seed_database()
     shopping = await db.shopping.find({"destination_id": destination_id}, {"_id": 0}).to_list(50)
     return shopping
 
 @api_router.get("/destinations/{destination_id}/transport")
 async def get_destination_transport(destination_id: str):
-    """Get transport options for a destination"""
     await seed_database()
     transport = await db.transport.find({"destination_id": destination_id}, {"_id": 0}).to_list(50)
     return transport
+
+# ============== NEW PACKVOTE API ENDPOINTS ==============
+
+@api_router.post("/trips")
+async def create_trip(trip_data: TripCreate):
+    """Create a new trip for group planning"""
+    trip = Trip(
+        name=trip_data.name,
+        description=trip_data.description or "",
+        creator_name=trip_data.creator_name,
+        group_type=trip_data.group_type,
+        start_date=trip_data.start_date,
+        end_date=trip_data.end_date,
+        budget_per_person=trip_data.budget_per_person,
+        members=[{"name": trip_data.creator_name, "is_creator": True, "joined_at": datetime.now(timezone.utc).isoformat()}]
+    )
+    
+    trip_dict = trip.model_dump()
+    trip_dict['created_at'] = trip_dict['created_at'].isoformat()
+    
+    await db.trips.insert_one(trip_dict)
+    return {"trip_id": trip.id, "invite_code": trip.invite_code, "message": "Trip created successfully!"}
+
+@api_router.post("/trips/join")
+async def join_trip(join_data: JoinTrip):
+    """Join an existing trip using invite code"""
+    trip = await db.trips.find_one({"invite_code": join_data.invite_code}, {"_id": 0})
+    if not trip:
+        raise HTTPException(status_code=404, detail="Invalid invite code")
+    
+    # Check if already a member
+    for member in trip.get('members', []):
+        if member['name'].lower() == join_data.member_name.lower():
+            raise HTTPException(status_code=400, detail="You're already a member of this trip")
+    
+    new_member = {"name": join_data.member_name, "is_creator": False, "joined_at": datetime.now(timezone.utc).isoformat()}
+    
+    await db.trips.update_one(
+        {"invite_code": join_data.invite_code},
+        {"$push": {"members": new_member}}
+    )
+    
+    return {"trip_id": trip['id'], "trip_name": trip['name'], "message": f"Welcome to {trip['name']}!"}
+
+@api_router.get("/trips/{trip_id}")
+async def get_trip(trip_id: str):
+    """Get trip details with votes"""
+    trip = await db.trips.find_one({"id": trip_id}, {"_id": 0})
+    if not trip:
+        raise HTTPException(status_code=404, detail="Trip not found")
+    return trip
+
+@api_router.get("/trips/code/{invite_code}")
+async def get_trip_by_code(invite_code: str):
+    """Get trip details by invite code"""
+    trip = await db.trips.find_one({"invite_code": invite_code}, {"_id": 0})
+    if not trip:
+        raise HTTPException(status_code=404, detail="Trip not found")
+    return trip
+
+@api_router.post("/trips/{trip_id}/vote")
+async def vote_on_item(trip_id: str, vote: VoteRequest):
+    """Vote on a destination or hotel"""
+    trip = await db.trips.find_one({"id": trip_id}, {"_id": 0})
+    if not trip:
+        raise HTTPException(status_code=404, detail="Trip not found")
+    
+    vote_field = f"{vote.item_type}_votes"
+    existing_votes = trip.get(vote_field, [])
+    
+    # Remove previous vote by same voter for same type
+    existing_votes = [v for v in existing_votes if v['voter_name'] != vote.voter_name]
+    
+    # Add new vote
+    existing_votes.append({
+        "voter_name": vote.voter_name,
+        "item_id": vote.item_id,
+        "voted_at": datetime.now(timezone.utc).isoformat()
+    })
+    
+    await db.trips.update_one(
+        {"id": trip_id},
+        {"$set": {vote_field: existing_votes}}
+    )
+    
+    return {"message": "Vote recorded!", "total_votes": len(existing_votes)}
+
+@api_router.get("/trips/{trip_id}/results")
+async def get_voting_results(trip_id: str):
+    """Get voting results for a trip"""
+    trip = await db.trips.find_one({"id": trip_id}, {"_id": 0})
+    if not trip:
+        raise HTTPException(status_code=404, detail="Trip not found")
+    
+    # Count destination votes
+    dest_votes = {}
+    for vote in trip.get('destination_votes', []):
+        item_id = vote['item_id']
+        dest_votes[item_id] = dest_votes.get(item_id, 0) + 1
+    
+    # Count hotel votes
+    hotel_votes = {}
+    for vote in trip.get('hotel_votes', []):
+        item_id = vote['item_id']
+        hotel_votes[item_id] = hotel_votes.get(item_id, 0) + 1
+    
+    # Get winning items
+    winning_dest = max(dest_votes, key=dest_votes.get) if dest_votes else None
+    winning_hotel = max(hotel_votes, key=hotel_votes.get) if hotel_votes else None
+    
+    return {
+        "destination_votes": dest_votes,
+        "hotel_votes": hotel_votes,
+        "winning_destination": winning_dest,
+        "winning_hotel": winning_hotel,
+        "total_members": len(trip.get('members', []))
+    }
+
+@api_router.post("/trips/{trip_id}/finalize")
+async def finalize_trip(trip_id: str):
+    """Finalize trip based on votes"""
+    results = await get_voting_results(trip_id)
+    
+    await db.trips.update_one(
+        {"id": trip_id},
+        {"$set": {
+            "status": "finalized",
+            "selected_destination": results['winning_destination'],
+            "selected_hotel": results['winning_hotel']
+        }}
+    )
+    
+    return {"message": "Trip finalized!", "destination": results['winning_destination'], "hotel": results['winning_hotel']}
+
+@api_router.post("/compare")
+async def compare_items(request: CompareRequest):
+    """Compare destinations or hotels"""
+    await seed_database()
+    
+    if request.item_type == "destinations":
+        items = await db.destinations.find({"id": {"$in": request.item_ids}}, {"_id": 0}).to_list(10)
+        
+        comparison = []
+        for item in items:
+            hotels = await db.hotels.find({"destination_id": item['id']}, {"_id": 0}).to_list(10)
+            avg_hotel_price = sum(h['price_per_night'] for h in hotels) / len(hotels) if hotels else 0
+            
+            comparison.append({
+                "id": item['id'],
+                "name": item['name'],
+                "state": item['state'],
+                "image_url": item['image_url'],
+                "best_time_to_visit": item['best_time_to_visit'],
+                "budget_per_day": item.get('budget_per_day', 3000),
+                "avg_hotel_price": int(avg_hotel_price),
+                "popular_for": item['popular_for']
+            })
+        
+        return {"type": "destinations", "items": comparison}
+    
+    elif request.item_type == "hotels":
+        items = await db.hotels.find({"id": {"$in": request.item_ids}}, {"_id": 0}).to_list(10)
+        
+        return {"type": "hotels", "items": items}
+    
+    raise HTTPException(status_code=400, detail="Invalid item type")
+
+@api_router.post("/ai/suggestions")
+async def get_ai_suggestions(request: AISuggestionRequest):
+    """Get AI-powered travel suggestions for a group"""
+    if not EMERGENT_LLM_KEY:
+        raise HTTPException(status_code=500, detail="AI service not configured")
+    
+    await seed_database()
+    destinations = await db.destinations.find({}, {"_id": 0}).to_list(100)
+    
+    dest_list = "\n".join([f"- {d['name']} ({d['state']}): {d['short_description']}. Budget: ₹{d.get('budget_per_day', 3000)}/day. Best for: {', '.join(d['popular_for'])}" for d in destinations])
+    
+    try:
+        chat = LlmChat(
+            api_key=EMERGENT_LLM_KEY,
+            session_id=f"packvote-suggestions-{uuid.uuid4()}",
+            system_message="You are PackVote's AI travel advisor. Help groups choose the perfect Indian destination. Be concise and practical."
+        )
+        chat.with_model("openai", "gpt-5.2")
+        
+        prompt = f"""Help me suggest the best Indian destinations for a {request.group_type} trip.
+
+Group Details:
+- Type: {request.group_type}
+- Budget per person: {'₹' + str(request.budget_per_person) if request.budget_per_person else 'Flexible'}
+- Duration: {str(request.duration_days) + ' days' if request.duration_days else 'Flexible'}
+- Group size: {request.group_size if request.group_size else 'Not specified'}
+- Interests: {', '.join(request.interests) if request.interests else 'Open to suggestions'}
+
+Available destinations:
+{dest_list}
+
+Suggest top 3 destinations with reasons. Format as:
+1. [Destination]: [Why it's perfect for this group]
+2. [Destination]: [Why it's perfect for this group]
+3. [Destination]: [Why it's perfect for this group]
+
+Also provide one tip for group travel planning."""
+
+        user_message = UserMessage(text=prompt)
+        response = await chat.send_message(user_message)
+        
+        return {"suggestions": response, "group_type": request.group_type}
+    except Exception as e:
+        logger.error(f"AI suggestion error: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to generate AI suggestions")
 
 @api_router.post("/ai/description")
 async def get_ai_description(request: AIDescriptionRequest):
@@ -531,7 +776,6 @@ async def get_ai_description(request: AIDescriptionRequest):
         }
         
         prompt = prompts.get(request.topic, prompts["overview"])
-        
         user_message = UserMessage(text=prompt)
         response = await chat.send_message(user_message)
         
@@ -540,7 +784,7 @@ async def get_ai_description(request: AIDescriptionRequest):
         logger.error(f"AI description error: {str(e)}")
         raise HTTPException(status_code=500, detail="Failed to generate AI description")
 
-# Include the router in the main app
+# Include the router
 app.include_router(api_router)
 
 app.add_middleware(
@@ -551,11 +795,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
 @app.on_event("startup")
