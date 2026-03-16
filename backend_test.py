@@ -339,17 +339,17 @@ class PackVote_APITester:
         return all_passed
 
 def main():
-    print("🇮🇳 India Travel Website API Testing")
+    print("🎯 PackVote API Testing")
     print("=" * 50)
     
     # Setup
-    tester = IndiaTravel_APITester()
+    tester = PackVote_APITester()
     
     # Run basic tests
     print("\n📋 BASIC API TESTS")
     tester.test_root_endpoint()
     
-    # Test destinations
+    # Test destinations (legacy functionality)
     print("\n🏛️ DESTINATIONS TESTS")
     success, destinations = tester.test_get_all_destinations()
     if not success:
@@ -368,6 +368,9 @@ def main():
     print("\n🤖 AI DESCRIPTION TESTS")
     tester.test_ai_description("Delhi", "overview")
     tester.test_ai_description("Goa", "food")
+    
+    # Test PackVote specific features
+    tester.test_packvote_features()
     
     # Print results
     print("\n" + "=" * 50)
