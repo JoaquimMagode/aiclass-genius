@@ -166,6 +166,159 @@ class PackVote_APITester:
             }
         )
 
+    # ============== NEW PACKVOTE API TESTS ==============
+    
+    def test_create_trip(self):
+        """Test creating a new trip"""
+        trip_data = {
+            "name": "Test Group Trip to Goa",
+            "creator_name": "Test User",
+            "group_type": "friends",
+            "budget_per_person": 15000
+        }
+        
+        success, data = self.run_test(
+            "Create Trip", 
+            "POST", 
+            "trips", 
+            200,
+            data=trip_data
+        )
+        
+        if success and data:
+            self.test_trip_id = data.get('trip_id')
+            self.test_invite_code = data.get('invite_code')
+            print(f"   Trip ID: {self.test_trip_id}")
+            print(f"   Invite Code: {self.test_invite_code}")
+        
+        return success, data
+
+    def test_join_trip(self):
+        """Test joining an existing trip"""
+        if not self.test_invite_code:
+            print("❌ Skipping join trip test - no invite code available")
+            return False, {}
+            
+        join_data = {
+            "invite_code": self.test_invite_code,
+            "member_name": "Test Member 2"
+        }
+        
+        return self.run_test(
+            "Join Trip", 
+            "POST", 
+            "trips/join", 
+            200,
+            data=join_data
+        )
+
+    def test_get_trip_details(self):
+        """Test getting trip details"""
+        if not self.test_trip_id:
+            print("❌ Skipping trip details test - no trip ID available")
+            return False, {}
+            
+        return self.run_test(
+            "Get Trip Details", 
+            "GET", 
+            f"trips/{self.test_trip_id}", 
+            200
+        )
+
+    def test_vote_on_destination(self):
+        """Test voting on a destination"""
+        if not self.test_trip_id:
+            print("❌ Skipping vote test - no trip ID available")
+            return False, {}
+            
+        vote_data = {
+            "trip_id": self.test_trip_id,
+            "voter_name": "Test User",
+            "item_type": "destination",
+            "item_id": "goa"
+        }
+        
+        return self.run_test(
+            "Vote on Destination", 
+            "POST", 
+            f"trips/{self.test_trip_id}/vote", 
+            200,
+            data=vote_data
+        )
+
+    def test_get_voting_results(self):
+        """Test getting voting results"""
+        if not self.test_trip_id:
+            print("❌ Skipping voting results test - no trip ID available")
+            return False, {}
+            
+        return self.run_test(
+            "Get Voting Results", 
+            "GET", 
+            f"trips/{self.test_trip_id}/results", 
+            200
+        )
+
+    def test_compare_destinations(self):
+        """Test comparing destinations"""
+        compare_data = {
+            "item_type": "destinations",
+            "item_ids": ["delhi", "goa", "jaipur"]
+        }
+        
+        return self.run_test(
+            "Compare Destinations", 
+            "POST", 
+            "compare", 
+            200,
+            data=compare_data
+        )
+
+    def test_ai_suggestions(self):
+        """Test AI travel suggestions"""
+        suggestion_data = {
+            "group_type": "friends",
+            "budget_per_person": 15000,
+            "duration_days": 5,
+            "interests": ["Beaches", "Adventure"],
+            "group_size": 4
+        }
+        
+        return self.run_test(
+            "AI Travel Suggestions", 
+            "POST", 
+            "ai/suggestions", 
+            200,
+            data=suggestion_data
+        )
+
+    def test_packvote_features(self):
+        """Test all PackVote specific features"""
+        print("\n🎯 PACKVOTE FEATURES TESTS")
+        
+        # Test trip creation
+        success1, _ = self.test_create_trip()
+        
+        # Test joining trip (depends on creation)
+        success2, _ = self.test_join_trip()
+        
+        # Test trip details
+        success3, _ = self.test_get_trip_details()
+        
+        # Test voting
+        success4, _ = self.test_vote_on_destination()
+        
+        # Test voting results
+        success5, _ = self.test_get_voting_results()
+        
+        # Test comparison
+        success6, _ = self.test_compare_destinations()
+        
+        # Test AI suggestions
+        success7, _ = self.test_ai_suggestions()
+        
+        return all([success1, success2, success3, success4, success5, success6, success7])
+
     def test_all_destinations_data(self):
         """Test all destination endpoints for multiple cities"""
         destinations = ["delhi", "jaipur", "goa", "kerala", "agra", "varanasi", "mumbai", "udaipur"]
