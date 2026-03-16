@@ -5,7 +5,7 @@ import sys
 import json
 from datetime import datetime
 
-class IndiaTravel_APITester:
+class PackVote_APITester:
     def __init__(self, base_url="https://discoveryatra.preview.emergentagent.com"):
         self.base_url = base_url
         self.api_url = f"{base_url}/api"
@@ -13,6 +13,8 @@ class IndiaTravel_APITester:
         self.tests_passed = 0
         self.failed_tests = []
         self.passed_tests = []
+        self.test_trip_id = None
+        self.test_invite_code = None
 
     def run_test(self, name, method, endpoint, expected_status, data=None, params=None):
         """Run a single API test"""
